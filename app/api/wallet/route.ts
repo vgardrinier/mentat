@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { walletService } from '@/features/payments/wallet';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
@@ -19,12 +19,20 @@ export async function GET(req: NextRequest) {
     if (limitCheck) return limitCheck;
 
     // Get user from database
-    const user = await db.query.users.findFirst({
+    let user = await db.query.users.findFirst({
       where: eq(users.clerkId, clerkId),
     });
 
+    // Auto-create user on first access
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      const clerkUser = await clerkClient.users.getUser(clerkId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress || 'unknown@example.com';
+
+      [user] = await db.insert(users).values({
+        clerkId,
+        email,
+        walletBalance: '0.00',
+      }).returning();
     }
 
     // Get wallet info

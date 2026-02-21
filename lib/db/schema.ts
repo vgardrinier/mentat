@@ -34,6 +34,8 @@ export const workers = pgTable('workers', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
+  workerType: varchar('worker_type', { length: 20 }).default('solo').notNull(), // solo, company
+  description: text('description'), // What the worker does
   specialty: varchar('specialty', { length: 100 }).notNull(),
   capabilities: jsonb('capabilities').notNull(),
   limitations: jsonb('limitations').notNull(),
@@ -41,12 +43,15 @@ export const workers = pgTable('workers', {
   requiredContext: jsonb('required_context').notNull(),
   avgCompletionTime: integer('avg_completion_time').notNull(), // minutes
   p90CompletionTime: integer('p90_completion_time').notNull(), // minutes (for timeout)
-  pricing: decimal('pricing', { precision: 10, scale: 2 }).notNull(),
+  pricing: decimal('pricing', { precision: 10, scale: 2 }).notNull(), // Legacy - use offers instead
+  offers: jsonb('offers'), // Array of structured offers (name, price, ETA, revisions, scope)
   stripeAccountId: varchar('stripe_account_id', { length: 255 }),
   apiEndpoint: varchar('api_endpoint', { length: 500 }).notNull(),
   webhookSecret: varchar('webhook_secret', { length: 255 }),
   reputationScore: decimal('reputation_score', { precision: 3, scale: 2 }).default('0.00'),
   completionCount: integer('completion_count').default(0).notNull(),
+  acceptingJobs: boolean('accepting_jobs').default(false).notNull(), // Toggle for going live
+  maxConcurrentJobs: integer('max_concurrent_jobs').default(5).notNull(),
   status: varchar('status', { length: 20 }).default('pending').notNull(), // pending, active, suspended
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

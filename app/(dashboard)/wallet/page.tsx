@@ -30,7 +30,16 @@ export default function WalletPage() {
   const fetchWallet = async () => {
     try {
       const response = await fetch('/api/wallet');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch wallet: ${response.status}`);
+      }
       const data = await response.json();
+
+      // Convert balance from string to number
+      if (data.balance) {
+        data.balance = parseFloat(data.balance);
+      }
+
       setWallet(data);
     } catch (error) {
       console.error('Failed to fetch wallet:', error);
@@ -64,6 +73,14 @@ export default function WalletPage() {
     );
   }
 
+  if (!wallet) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Failed to load wallet. Please try refreshing.</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="md:flex md:items-center md:justify-between">
@@ -81,7 +98,7 @@ export default function WalletPage() {
             <div>
               <p className="text-sm font-medium text-gray-500">Available Balance</p>
               <p className="mt-1 text-3xl font-semibold text-gray-900">
-                ${wallet?.balance.toFixed(2)}
+                ${(wallet.balance || 0).toFixed(2)}
               </p>
               {wallet?.needsTopUp && (
                 <p className="mt-2 text-sm text-yellow-600">
