@@ -68,7 +68,7 @@ export default function WalletPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading wallet...</div>
+        <div className="text-green-400 font-mono">$ loading wallet...</div>
       </div>
     );
   }
@@ -76,124 +76,110 @@ export default function WalletPage() {
   if (!wallet) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Failed to load wallet. Please try refreshing.</div>
+        <div className="text-red-400 font-mono">✗ Failed to load wallet</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="md:flex md:items-center md:justify-between">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Wallet
-          </h2>
-        </div>
-      </div>
-
+    <div className="space-y-6 font-mono">
       {/* Balance Card */}
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Available Balance</p>
-              <p className="mt-1 text-3xl font-semibold text-gray-900">
-                ${(wallet.balance || 0).toFixed(2)}
+      <div className="border border-green-800 bg-gray-950 rounded p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm text-gray-500">$ wallet --balance</p>
+            <p className="mt-2 text-4xl font-bold text-green-400">
+              ${(wallet.balance || 0).toFixed(2)}
+            </p>
+            {wallet?.needsTopUp && (
+              <p className="mt-2 text-sm text-yellow-500">
+                // Low balance - consider adding funds
               </p>
-              {wallet?.needsTopUp && (
-                <p className="mt-2 text-sm text-yellow-600">
-                  ⚠️ Balance low - consider adding funds
-                </p>
-              )}
-            </div>
-            <div>
+            )}
+          </div>
+          <div>
+            <button
+              onClick={() => setAdding(!adding)}
+              className="px-4 py-2 bg-green-600 text-black rounded hover:bg-green-500 font-medium"
+            >
+              + add funds
+            </button>
+          </div>
+        </div>
+
+        {adding && (
+          <div className="mt-6 pt-6 border-t border-gray-800">
+            <label className="block text-sm text-gray-400 mb-2">
+              Amount (USD)
+            </label>
+            <div className="flex space-x-3">
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                min="5"
+                max="1000"
+                className="w-32 bg-black border border-gray-700 rounded px-3 py-2 text-green-400 focus:border-green-500 focus:outline-none"
+              />
               <button
-                onClick={() => setAdding(!adding)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                onClick={handleAddFunds}
+                className="px-4 py-2 border border-green-600 text-green-400 rounded hover:bg-gray-800"
               >
-                Add Funds
+                → checkout
               </button>
             </div>
+            <p className="mt-2 text-xs text-gray-600">
+              // Min: $5, Max: $1000
+            </p>
           </div>
-
-          {adding && (
-            <div className="mt-6 border-t border-gray-200 pt-6">
-              <label className="block text-sm font-medium text-gray-700">
-                Amount (USD)
-              </label>
-              <div className="mt-2 flex space-x-3">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min="5"
-                  max="1000"
-                  className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-                <button
-                  onClick={handleAddFunds}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
-                >
-                  Continue to Checkout
-                </button>
-              </div>
-              <p className="mt-2 text-sm text-gray-500">
-                Minimum: $5, Maximum: $1000
-              </p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Transactions */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Recent Transactions
+      <div className="border border-gray-800 bg-gray-950 rounded">
+        <div className="px-6 py-4 border-b border-gray-800">
+          <h3 className="text-lg text-green-400">
+            $ wallet --transactions
           </h3>
         </div>
-        <ul className="divide-y divide-gray-200">
-          {wallet?.transactions.map((tx) => (
-            <li key={tx.id}>
-              <div className="px-4 py-4 sm:px-6">
+        <div className="divide-y divide-gray-800">
+          {wallet?.transactions.length === 0 ? (
+            <div className="px-6 py-8 text-center text-gray-600">
+              // No transactions yet
+            </div>
+          ) : (
+            wallet?.transactions.map((tx) => (
+              <div key={tx.id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <p className="text-sm font-medium text-gray-900 capitalize">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-gray-500 uppercase text-xs">
                       {tx.type}
-                    </p>
+                    </span>
                     {tx.reference && (
-                      <p className="ml-2 text-sm text-gray-500">
-                        ({tx.reference.substring(0, 8)}...)
-                      </p>
+                      <span className="text-gray-600 text-xs">
+                        {tx.reference.substring(0, 8)}
+                      </span>
                     )}
                   </div>
-                  <div className="flex items-center">
-                    <p
-                      className={`text-sm font-medium ${
-                        tx.type === 'deposit' || tx.type === 'refund'
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {tx.type === 'deposit' || tx.type === 'refund' ? '+' : '-'}$
-                      {tx.amount}
-                    </p>
-                  </div>
+                  <span
+                    className={`font-medium ${
+                      tx.type === 'deposit' || tx.type === 'refund'
+                        ? 'text-green-400'
+                        : 'text-red-400'
+                    }`}
+                  >
+                    {tx.type === 'deposit' || tx.type === 'refund' ? '+' : '-'}$
+                    {tx.amount}
+                  </span>
                 </div>
-                <div className="mt-2 sm:flex sm:justify-between">
-                  <div className="sm:flex">
-                    <p className="text-sm text-gray-500">
-                      Balance after: ${tx.balanceAfter}
-                    </p>
-                  </div>
-                  <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p>{new Date(tx.createdAt).toLocaleString()}</p>
-                  </div>
+                <div className="mt-1 flex justify-between text-xs text-gray-600">
+                  <span>Balance: ${tx.balanceAfter}</span>
+                  <span>{new Date(tx.createdAt).toLocaleString()}</span>
                 </div>
               </div>
-            </li>
-          ))}
-        </ul>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
