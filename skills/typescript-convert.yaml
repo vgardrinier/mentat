@@ -1,0 +1,82 @@
+skill:
+  id: typescript-convert
+  name: Convert JavaScript to TypeScript
+  description: Convert JavaScript files to TypeScript with proper type annotations
+  category: code-quality
+  pricing: free
+  author: marketplace
+  version: 1.0.0
+
+  inputs:
+    strict_mode:
+      type: boolean
+      required: false
+      default: true
+      description: Use strict TypeScript types (no 'any')
+
+    add_jsdoc:
+      type: boolean
+      required: false
+      default: false
+      description: Preserve JSDoc comments as type annotations
+
+  context_needed:
+    - description: JavaScript file(s) to convert
+      pattern: "**/*.{js,jsx}"
+      max_files: 10
+
+  execution:
+    - step: for_each
+      items: ${context.files}
+      as: file
+      do:
+        - step: read_file
+          path: ${file.path}
+          save_as: js_content
+
+        - step: analyze_code
+          content: ${js_content}
+          detect:
+            - functions
+            - variables
+            - imports
+            - exports
+          save_as: code_structure
+
+        - step: generate_types
+          structure: ${code_structure}
+          strict: ${inputs.strict_mode}
+          preserve_jsdoc: ${inputs.add_jsdoc}
+          save_as: type_annotations
+
+        - step: transform
+          source: ${js_content}
+          annotations: ${type_annotations}
+          save_as: ts_content
+
+        - step: rename_file
+          from: ${file.path}
+          to: ${file.path.replace('.js', '.ts').replace('.jsx', '.tsx')}
+
+        - step: write_file
+          path: ${file.path.replace('.js', '.ts').replace('.jsx', '.tsx')}
+          content: ${ts_content}
+
+        - step: delete_file
+          path: ${file.path}
+
+    - step: update_config
+      if_exists: tsconfig.json
+      add_files: ${context.files.map(f => f.path.replace('.js', '.ts'))}
+
+  validation:
+    - check: valid_javascript
+      files: ${context.files}
+      error: "Files must be valid JavaScript"
+
+    - check: no_syntax_errors
+      files: ${context.files}
+
+  success_message: "✓ Converted ${context.files.length} file(s) to TypeScript"
+
+  estimated_time: 5 # seconds per file

@@ -1,0 +1,82 @@
+skill:
+  id: seo-meta-tags
+  name: Add SEO Meta Tags
+  description: Generate and add SEO meta tags to web pages
+  category: seo
+  pricing: free
+  author: marketplace
+  version: 1.0.0
+
+  inputs:
+    target_keyword:
+      type: string
+      required: true
+      description: Primary keyword to optimize for
+      example: "AI agent marketplace"
+
+    page_description:
+      type: string
+      required: false
+      description: Custom page description (auto-generated if not provided)
+
+    og_image:
+      type: string
+      required: false
+      description: URL to Open Graph image
+      example: "/og-image.png"
+
+  context_needed:
+    - description: Target page to add tags to
+      pattern: "**/*.{tsx,jsx,html}"
+      max_files: 1
+
+  execution:
+    - step: read_file
+      path: ${context.files[0]}
+      save_as: current_content
+
+    - step: analyze
+      content: ${current_content}
+      extract:
+        - title
+        - existing_description
+        - main_heading
+      save_as: analysis
+
+    - step: generate
+      template: |
+        <meta name="description" content="${page_description || analysis.existing_description}" />
+        <meta name="keywords" content="${target_keyword}" />
+
+        <!-- Open Graph -->
+        <meta property="og:title" content="${analysis.title}" />
+        <meta property="og:description" content="${page_description || analysis.existing_description}" />
+        <meta property="og:image" content="${og_image || '/og-default.png'}" />
+        <meta property="og:type" content="website" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${analysis.title}" />
+        <meta name="twitter:description" content="${page_description || analysis.existing_description}" />
+        <meta name="twitter:image" content="${og_image || '/og-default.png'}" />
+      save_as: meta_tags
+
+    - step: update_file
+      path: ${context.files[0]}
+      operation: insert_after
+      target: "<head>"
+      content: ${meta_tags}
+      if_not_exists: 'meta name="description"'
+
+  validation:
+    - check: file_exists
+      path: ${context.files[0]}
+
+    - check: contains
+      file: ${context.files[0]}
+      pattern: "<head>"
+      error: "File must have a <head> tag"
+
+  success_message: "✓ Added SEO meta tags with keyword: ${target_keyword}"
+
+  estimated_time: 2 # seconds

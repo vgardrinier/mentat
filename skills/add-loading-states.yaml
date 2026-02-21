@@ -1,0 +1,71 @@
+skill:
+  id: add-loading-states
+  name: Add Loading States
+  description: Add loading spinners and skeleton screens to components
+  category: ui-ux
+  pricing: free
+  author: marketplace
+  version: 1.0.0
+
+  inputs:
+    loading_type:
+      type: select
+      required: true
+      default: spinner
+      description: Type of loading indicator
+      options:
+        - spinner
+        - skeleton
+        - progress-bar
+
+    position:
+      type: select
+      required: false
+      default: center
+      description: Where to display loading indicator
+      options:
+        - center
+        - inline
+        - overlay
+
+  context_needed:
+    - description: Component file(s) to add loading states
+      pattern: "**/*.{tsx,jsx}"
+      max_files: 5
+
+  execution:
+    - step: for_each
+      items: ${context.files}
+      as: file
+      do:
+        - step: read_file
+          path: ${file.path}
+          save_as: component_content
+
+        - step: analyze_code
+          content: ${component_content}
+          detect:
+            - async_operations
+            - data_fetching
+            - state_variables
+          save_as: analysis
+
+        - step: generate
+          template: loading_component
+          inputs:
+            type: ${inputs.loading_type}
+            position: ${inputs.position}
+            existing_code: ${component_content}
+          save_as: updated_component
+
+        - step: write_file
+          path: ${file.path}
+          content: ${updated_component}
+
+  validation:
+    - check: valid_react_component
+      files: ${context.files}
+
+  success_message: "✓ Added loading states to ${context.files.length} component(s)"
+
+  estimated_time: 3

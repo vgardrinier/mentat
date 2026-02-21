@@ -1,0 +1,69 @@
+skill:
+  id: optimize-images
+  name: Optimize Images
+  description: Compress and convert images to modern formats (WebP, AVIF)
+  category: performance
+  pricing: free
+  author: marketplace
+  version: 1.0.0
+
+  inputs:
+    target_format:
+      type: select
+      required: true
+      default: webp
+      description: Target image format
+      options:
+        - webp
+        - avif
+        - both
+
+    quality:
+      type: number
+      required: false
+      default: 80
+      description: Compression quality (0-100)
+
+    max_width:
+      type: number
+      required: false
+      default: 1920
+      description: Maximum image width in pixels
+
+  context_needed:
+    - description: Image files to optimize
+      pattern: "**/*.{jpg,jpeg,png}"
+      max_files: 20
+
+  execution:
+    - step: for_each
+      items: ${context.files}
+      as: image
+      do:
+        - step: read_file
+          path: ${image.path}
+          save_as: image_data
+
+        - step: transform
+          source: ${image_data}
+          operation: compress_image
+          format: ${inputs.target_format}
+          quality: ${inputs.quality}
+          max_width: ${inputs.max_width}
+          save_as: optimized_image
+
+        - step: write_file
+          path: ${image.path.replace(/\.(jpg|jpeg|png)$/, `.${inputs.target_format}`)}
+          content: ${optimized_image}
+
+        - step: update_references
+          old_path: ${image.path}
+          new_path: ${image.path.replace(/\.(jpg|jpeg|png)$/, `.${inputs.target_format}`)}
+
+  validation:
+    - check: valid_images
+      files: ${context.files}
+
+  success_message: "✓ Optimized ${context.files.length} image(s)"
+
+  estimated_time: 10
