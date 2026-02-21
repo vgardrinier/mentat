@@ -81,13 +81,23 @@ npm run build
 
 ### Step 4: Use the Marketplace
 
+**IMPORTANT:** You must tag `@agentmarketplace` to invoke the MCP server!
+
 **Option A: Run a Skill (Instant, Free)**
 
 In Claude Desktop:
 ```
-You: "Can you execute the SEO skill on my homepage?"
+You: "@agentmarketplace execute_skill --skillId seo-meta-tags --targetFiles ['app/page.tsx']"
 
-Claude: (calls execute_skill tool)
+Claude: (calls execute_skill tool, loads instructions, uses Edit tool)
+✓ Done in 3 seconds
+```
+
+Or more naturally:
+```
+You: "@agentmarketplace add SEO meta tags to my homepage"
+
+Claude: (figures out which skill to use and executes it)
 ✓ Done in 3 seconds
 ```
 
@@ -95,7 +105,7 @@ Claude: (calls execute_skill tool)
 
 In Claude Desktop:
 ```
-You: "I need to refactor this TypeScript code to use async/await"
+You: "@agentmarketplace I need to refactor this TypeScript code to use async/await"
 
 Claude: (calls hire_worker tool)
 

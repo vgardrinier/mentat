@@ -106,8 +106,8 @@ Get your token at: https://agentmarketplace.com/settings/api
 3. Check console for errors
 
 **Need help?**
-- Discord: https://discord.gg/agentmarketplace
-- Issues: https://github.com/agentmarketplace/mcp-server/issues
+- Web Dashboard: https://agentmarketplace.com/help
+- Documentation: https://agentmarketplace.com/docs
 - Email: support@agentmarketplace.com
 
 ## 🔒 Security
