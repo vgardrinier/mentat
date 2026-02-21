@@ -1,0 +1,121 @@
+import { pgTable, uuid, varchar, text, decimal, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { createId } from '@paralleldrive/cuid2';
+
+// Re-export audit logs table
+export { auditLogs, type AuditLog, type NewAuditLog } from './schema-audit';
+
+// Users table
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clerkId: varchar('clerk_id', { length: 255 }).unique().notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  walletBalance: decimal('wallet_balance', { precision: 10, scale: 2 }).default('0.00').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Skills table
+export const skills = pgTable('skills', {
+  id: varchar('id', { length: 100 }).primaryKey(), // e.g., "seo-meta-tags@1"
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  category: varchar('category', { length: 50 }).notNull(),
+  definition: jsonb('definition').notNull(), // Full YAML parsed to JSON
+  pricing: decimal('pricing', { precision: 10, scale: 2 }).default('0.00').notNull(),
+  creatorId: uuid('creator_id').references(() => users.id),
+  usageCount: integer('usage_count').default(0).notNull(),
+  rating: decimal('rating', { precision: 3, scale: 2 }),
+  version: varchar('version', { length: 20 }).notNull(), // semver
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Workers table
+export const workers = pgTable('workers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  specialty: varchar('specialty', { length: 100 }).notNull(),
+  capabilities: jsonb('capabilities').notNull(),
+  limitations: jsonb('limitations').notNull(),
+  requiredInputs: jsonb('required_inputs').notNull(),
+  requiredContext: jsonb('required_context').notNull(),
+  avgCompletionTime: integer('avg_completion_time').notNull(), // minutes
+  p90CompletionTime: integer('p90_completion_time').notNull(), // minutes (for timeout)
+  pricing: decimal('pricing', { precision: 10, scale: 2 }).notNull(),
+  stripeAccountId: varchar('stripe_account_id', { length: 255 }),
+  apiEndpoint: varchar('api_endpoint', { length: 500 }).notNull(),
+  webhookSecret: varchar('webhook_secret', { length: 255 }),
+  reputationScore: decimal('reputation_score', { precision: 3, scale: 2 }).default('0.00'),
+  completionCount: integer('completion_count').default(0).notNull(),
+  status: varchar('status', { length: 20 }).default('pending').notNull(), // pending, active, suspended
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Jobs table
+export const jobs = pgTable('jobs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  type: varchar('type', { length: 20 }).notNull(), // 'skill' or 'worker'
+  skillId: varchar('skill_id', { length: 100 }).references(() => skills.id),
+  workerId: uuid('worker_id').references(() => workers.id),
+  task: text('task').notNull(),
+  inputs: jsonb('inputs'),
+  context: jsonb('context'), // Files and metadata sent to worker
+  status: varchar('status', { length: 20 }).notNull(), // posted, in_progress, delivered, approved, rejected, cancelled
+  deliverableText: text('deliverable_text'),
+  deliverableUrl: varchar('deliverable_url', { length: 500 }),
+  deliverableFiles: jsonb('deliverable_files'),
+  budget: decimal('budget', { precision: 10, scale: 2 }).notNull(),
+  rating: integer('rating'),
+  feedback: text('feedback'),
+  timeoutAt: timestamp('timeout_at'), // Auto-cancel if not delivered by this time
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  acceptedAt: timestamp('accepted_at'),
+  deliveredAt: timestamp('delivered_at'),
+  completedAt: timestamp('completed_at'),
+});
+
+// Escrow table
+export const escrow = pgTable('escrow', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  jobId: uuid('job_id').references(() => jobs.id).notNull(),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  platformFee: decimal('platform_fee', { precision: 10, scale: 2 }).notNull(),
+  workerPayout: decimal('worker_payout', { precision: 10, scale: 2 }).notNull(),
+  status: varchar('status', { length: 20 }).notNull(), // locked, released, refunded
+  stripeTransferId: varchar('stripe_transfer_id', { length: 255 }),
+  lockedAt: timestamp('locked_at').defaultNow().notNull(),
+  releasedAt: timestamp('released_at'),
+});
+
+// Transactions table (audit log)
+export const transactions = pgTable('transactions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  type: varchar('type', { length: 20 }).notNull(), // deposit, deduction, refund, payout
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  balanceAfter: decimal('balance_after', { precision: 10, scale: 2 }).notNull(),
+  reference: varchar('reference', { length: 255 }), // job_id or stripe_id
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Types
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+export type Skill = typeof skills.$inferSelect;
+export type NewSkill = typeof skills.$inferInsert;
+
+export type Worker = typeof workers.$inferSelect;
+export type NewWorker = typeof workers.$inferInsert;
+
+export type Job = typeof jobs.$inferSelect;
+export type NewJob = typeof jobs.$inferInsert;
+
+export type Escrow = typeof escrow.$inferSelect;
+export type NewEscrow = typeof escrow.$inferInsert;
+
+export type Transaction = typeof transactions.$inferSelect;
+export type NewTransaction = typeof transactions.$inferInsert;
