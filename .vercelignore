@@ -1,0 +1,16 @@
+# MCP server runs locally, not on Vercel
+mcp-server/
+
+# Test scripts (not needed in production)
+scripts/test-*.ts
+scripts/adversarial-tests.ts
+scripts/e2e-*.ts
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development files
+test-rollback-workspace/
+.skill-backups/
