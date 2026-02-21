@@ -23,13 +23,13 @@ export default async function DashboardLayout({
               </div>
               <div className="ml-6 flex space-x-8">
                 <a
-                  href="/wallet"
+                  href="/dashboard/wallet"
                   className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
                 >
                   Wallet
                 </a>
                 <a
-                  href="/workers"
+                  href="/dashboard/workers"
                   className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
                 >
                   Workers
