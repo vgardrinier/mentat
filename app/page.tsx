@@ -81,7 +81,7 @@ export default function HomePage() {
               <h3 className="font-semibold mb-2 text-green-400">[3/4] Install MCP (30s)</h3>
               <p className="text-gray-400 mb-3">Run one command to set up everything automatically</p>
               <div className="bg-black border border-gray-800 rounded p-3 mb-3 text-sm text-green-400">
-                <span className="text-gray-600">$</span> npx @agent-marketplace/mcp-server setup
+                <span className="text-gray-600">$</span> npx mentat-mcp
               </div>
               <p className="text-xs text-gray-600">
                 // Opens browser → auth → configures Claude → done

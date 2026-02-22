@@ -57,16 +57,20 @@ export default function SetupAuthPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-red-500 text-5xl mb-4">❌</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Setup Failed</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="max-w-md w-full border border-red-800 bg-gray-950 rounded p-8 font-mono">
+          <pre className="text-red-400 text-sm mb-6">
+{`╔════════════════════════════════════════╗
+║           SETUP FAILED                 ║
+╚════════════════════════════════════════╝`}
+          </pre>
+          <p className="text-red-400 mb-2">ERROR:</p>
+          <p className="text-gray-400 mb-6 font-mono text-sm">{error}</p>
           <a
-            href="/docs"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            href="/"
+            className="inline-block px-6 py-2 bg-red-600 text-black rounded hover:bg-red-500 font-medium"
           >
-            View Documentation
+            ← Back to Home
           </a>
         </div>
       </div>
@@ -74,39 +78,53 @@ export default function SetupAuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-        <div className="animate-spin text-blue-600 text-5xl mb-4">⚙️</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Setting Up Agent Marketplace
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="max-w-md w-full border border-green-800 bg-gray-950 rounded p-8 font-mono">
+        <pre className="text-green-400 text-sm mb-6">
+{`╔════════════════════════════════════════╗
+║      AGENT MARKETPLACE SETUP           ║
+╚════════════════════════════════════════╝`}
+        </pre>
 
         {status === 'loading' && (
-          <p className="text-gray-600">Loading...</p>
+          <div className="text-green-400">
+            <p className="mb-2">$ Loading...</p>
+            <div className="flex space-x-1">
+              <span className="animate-pulse">.</span>
+              <span className="animate-pulse delay-100">.</span>
+              <span className="animate-pulse delay-200">.</span>
+            </div>
+          </div>
         )}
 
         {status === 'generating' && (
-          <>
-            <p className="text-gray-600 mb-4">
-              Generating authentication token for:
-            </p>
-            <p className="text-sm font-mono bg-gray-100 p-3 rounded">
-              {user?.primaryEmailAddress?.emailAddress}
-            </p>
-          </>
+          <div className="text-green-400">
+            <p className="mb-4">$ Generating authentication token...</p>
+            <div className="bg-black border border-gray-800 rounded p-3 mb-4">
+              <p className="text-gray-500 text-sm">user:</p>
+              <p className="text-green-400 text-sm">{user?.primaryEmailAddress?.emailAddress}</p>
+            </div>
+            <div className="flex space-x-1">
+              <span className="animate-pulse">.</span>
+              <span className="animate-pulse delay-100">.</span>
+              <span className="animate-pulse delay-200">.</span>
+            </div>
+          </div>
         )}
 
         {status === 'redirecting' && (
-          <>
-            <p className="text-green-600 font-semibold mb-2">✓ Success!</p>
-            <p className="text-gray-600">Redirecting back to terminal...</p>
-          </>
+          <div className="text-green-400">
+            <p className="mb-2 flex items-center">
+              <span className="text-green-400 mr-2">✓</span>
+              <span>Authentication Complete</span>
+            </p>
+            <p className="text-gray-400 text-sm mb-4">$ Redirecting back to terminal...</p>
+            <div className="bg-black border border-gray-800 rounded p-3">
+              <p className="text-gray-500 text-xs">// This window will close automatically</p>
+              <p className="text-gray-500 text-xs">// Return to your terminal to continue</p>
+            </div>
+          </div>
         )}
-
-        <div className="mt-6 text-sm text-gray-500">
-          <p>This window will close automatically.</p>
-          <p>Return to your terminal to continue.</p>
-        </div>
       </div>
     </div>
   );
