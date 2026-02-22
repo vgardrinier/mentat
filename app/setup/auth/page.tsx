@@ -41,7 +41,9 @@ export default function SetupAuthPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate token');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Token generation failed:', response.status, errorData);
+        throw new Error(errorData.error || `Server error: ${response.status}`);
       }
 
       const { token } = await response.json();
@@ -51,6 +53,7 @@ export default function SetupAuthPage() {
       // Redirect back to CLI with token
       window.location.href = `${callbackUrl}?token=${token}`;
     } catch (err) {
+      console.error('Setup error:', err);
       setError(err instanceof Error ? err.message : 'Setup failed');
     }
   }
@@ -88,26 +91,16 @@ export default function SetupAuthPage() {
 
         {status === 'loading' && (
           <div className="text-green-400">
-            <p className="mb-2">$ Loading...</p>
-            <div className="flex space-x-1">
-              <span className="animate-pulse">.</span>
-              <span className="animate-pulse delay-100">.</span>
-              <span className="animate-pulse delay-200">.</span>
-            </div>
+            <p className="mb-2">$ Loading<span className="animate-pulse">...</span></p>
           </div>
         )}
 
         {status === 'generating' && (
           <div className="text-green-400">
-            <p className="mb-4">$ Generating authentication token...</p>
+            <p className="mb-4">$ Generating authentication token<span className="animate-pulse">...</span></p>
             <div className="bg-black border border-gray-800 rounded p-3 mb-4">
               <p className="text-gray-500 text-sm">user:</p>
               <p className="text-green-400 text-sm">{user?.primaryEmailAddress?.emailAddress}</p>
-            </div>
-            <div className="flex space-x-1">
-              <span className="animate-pulse">.</span>
-              <span className="animate-pulse delay-100">.</span>
-              <span className="animate-pulse delay-200">.</span>
             </div>
           </div>
         )}
