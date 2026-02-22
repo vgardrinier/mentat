@@ -158,6 +158,14 @@ function startCallbackServer(): Promise<string> {
       }
     });
 
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        reject(new Error(`Port ${SETUP_PORT} is already in use. Please close other applications and try again.`));
+      } else {
+        reject(err);
+      }
+    });
+
     server.listen(SETUP_PORT, () => {
       console.log('✓ Local server started');
       console.log('');
@@ -171,7 +179,7 @@ function startCallbackServer(): Promise<string> {
     // Timeout after 5 minutes
     setTimeout(() => {
       server.close();
-      reject(new Error('Setup timed out after 5 minutes'));
+      reject(new Error('Setup timed out after 5 minutes. Please try again.'));
     }, 5 * 60 * 1000);
   });
 }
@@ -267,8 +275,18 @@ function openBrowser(url: string) {
 // Run setup
 setup().catch((error) => {
   console.error('');
-  console.error('❌ Setup failed:', error.message);
+  console.error('╔════════════════════════════════════════════════╗');
+  console.error('║  ❌ SETUP FAILED                               ║');
+  console.error('╚════════════════════════════════════════════════╝');
+  console.error('');
+  console.error('Error:', error.message);
+  console.error('');
+  console.error('Common fixes:');
+  console.error('  • Make sure you\'re signed in at http://localhost:3000');
+  console.error('  • Check that port 3456 is not in use');
+  console.error('  • Try running the command again');
   console.error('');
   console.error('Need help? https://github.com/vgardrinier/a2a_marketplace');
+  console.error('');
   process.exit(1);
 });
