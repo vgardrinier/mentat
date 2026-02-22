@@ -60,7 +60,7 @@ async function setup() {
   console.log('Next steps:');
   console.log('1. Restart Claude Code');
   console.log('2. Open any project');
-  console.log('3. Try: @agentmarketplace execute_skill --skillId seo-meta-tags');
+  console.log('3. Try: @mentat execute_skill --skillId seo-meta-tags');
   console.log('');
   console.log('Available skills:');
   console.log('  • seo-meta-tags - Add SEO meta tags');
@@ -72,6 +72,9 @@ async function setup() {
   console.log('');
   console.log('Need help? https://github.com/vgardrinier/a2a_marketplace');
   console.log('');
+
+  // Exit cleanly
+  process.exit(0);
 }
 
 /**
@@ -98,40 +101,60 @@ function startCallbackServer(): Promise<string> {
           <!DOCTYPE html>
           <html>
             <head>
-              <title>Setup Complete</title>
+              <meta charset="utf-8">
+              <title>Mentat Setup Complete</title>
               <style>
                 body {
-                  font-family: system-ui, -apple-system, sans-serif;
+                  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
                   display: flex;
                   align-items: center;
                   justify-content: center;
                   height: 100vh;
                   margin: 0;
-                  background: #f5f5f5;
+                  background: #000;
+                  color: #4ade80;
                 }
                 .container {
-                  text-align: center;
-                  background: white;
+                  border: 2px solid #166534;
+                  background: #0a0a0a;
                   padding: 48px;
-                  border-radius: 12px;
-                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                  border-radius: 8px;
+                  max-width: 600px;
                 }
-                h1 { color: #10b981; margin: 0 0 16px 0; }
-                p { color: #6b7280; margin: 0; }
+                .header {
+                  color: #4ade80;
+                  font-size: 14px;
+                  white-space: pre;
+                  margin-bottom: 24px;
+                }
+                .message {
+                  color: #4ade80;
+                  margin: 16px 0;
+                  font-size: 16px;
+                }
+                .note {
+                  color: #6b7280;
+                  font-size: 14px;
+                  margin-top: 24px;
+                }
               </style>
             </head>
             <body>
               <div class="container">
-                <h1>✅ Authentication Complete!</h1>
-                <p>You can close this window and return to your terminal.</p>
+                <div class="header">╔════════════════════════════════════════════════╗
+║  ✓ MENTAT SETUP COMPLETE                       ║
+╚════════════════════════════════════════════════╝</div>
+                <div class="message">$ Authentication successful</div>
+                <div class="note">// You can close this window and return to your terminal</div>
               </div>
             </body>
           </html>
         `);
 
         // Close server and resolve with token
-        server.close();
-        resolve(token);
+        server.close(() => {
+          resolve(token);
+        });
       }
     });
 
