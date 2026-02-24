@@ -241,22 +241,13 @@ async function configureClaudeCode(token: string): Promise<void> {
 
 /**
  * Get Claude Code config path based on OS
+ * Claude Code CLI uses ~/.claude.json
  */
 function getClaudeConfigPath(): string | null {
   const home = process.env.HOME || process.env.USERPROFILE || '';
 
-  if (process.platform === 'darwin') {
-    // macOS
-    return path.join(home, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
-  } else if (process.platform === 'win32') {
-    // Windows
-    return path.join(home, 'AppData', 'Roaming', 'Claude', 'claude_desktop_config.json');
-  } else if (process.platform === 'linux') {
-    // Linux
-    return path.join(home, '.config', 'Claude', 'claude_desktop_config.json');
-  }
-
-  return null;
+  // Claude Code CLI config (not Claude Desktop!)
+  return path.join(home, '.claude.json');
 }
 
 /**
