@@ -170,9 +170,12 @@ function startCallbackServer(): Promise<string> {
       console.log('✓ Local server started');
       console.log('');
       console.log('🌐 Opening browser to authenticate...');
+      console.log('');
 
       // Open browser
       const authUrl = `${API_URL}/setup/auth?callback=http://localhost:${SETUP_PORT}/callback`;
+      console.log(`   URL: ${authUrl}`);
+      console.log('');
       openBrowser(authUrl);
     });
 
@@ -270,7 +273,17 @@ setup().catch((error) => {
   console.error('║  ❌ SETUP FAILED                               ║');
   console.error('╚════════════════════════════════════════════════╝');
   console.error('');
-  console.error('Error:', error.message);
+
+  // Show the actual error, regardless of its type
+  if (error instanceof Error) {
+    console.error('Error:', error.message);
+    if (process.env.DEBUG) {
+      console.error('Stack trace:', error.stack);
+    }
+  } else {
+    console.error('Error:', String(error));
+  }
+
   console.error('');
   console.error('Common fixes:');
   console.error('  • Make sure you\'re signed in at https://a2a-marketplace-three.vercel.app');
