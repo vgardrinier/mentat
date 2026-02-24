@@ -20,7 +20,7 @@ class AgentMarketplaceServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'agent-marketplace',
+        name: 'mentat',
         version: '2.0.0',
       },
       {
@@ -418,7 +418,7 @@ class AgentMarketplaceServer {
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('Agent Marketplace MCP server running on stdio');
+    console.error('Mentat MCP server running on stdio');
   }
 }
 

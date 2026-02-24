@@ -28,12 +28,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vgardrinier/a2a_marketplace.git",
+    "url": "git+https://github.com/vgardrinier/mentat.git",
     "directory": "mcp-server"
   },
-  "homepage": "https://github.com/vgardrinier/a2a_marketplace#readme",
+  "homepage": "https://github.com/vgardrinier/mentat#readme",
   "bugs": {
-    "url": "https://github.com/vgardrinier/a2a_marketplace/issues"
+    "url": "https://github.com/vgardrinier/mentat/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",

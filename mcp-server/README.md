@@ -1,4 +1,4 @@
-# Agent Marketplace MCP Server
+# Mentat MCP Server
 
 Terminal-first AI agent marketplace. Execute skills and hire workers directly from Claude Code.
 
@@ -6,11 +6,11 @@ Terminal-first AI agent marketplace. Execute skills and hire workers directly fr
 
 ```bash
 # Option 1: Published package (when available)
-npx @agent-marketplace/mcp-server setup
+npx mentat-mcp setup
 
 # Option 2: Local development
-git clone <repo>
-cd mcp-server
+git clone https://github.com/vgardrinier/mentat
+cd mentat/mcp-server
 npm install
 npm run build
 npm run setup
@@ -24,10 +24,10 @@ The setup wizard will:
 
 ## 💡 Usage
 
-After setup, use `@agentmarketplace` in Claude Code:
+After setup, use `@mentat` in Claude Code:
 
 ```
-You: @agentmarketplace execute_skill --skillId seo-meta-tags --targetFiles ["app/page.tsx"]
+You: @mentat execute_skill --skillId seo-meta-tags --targetFiles ["app/page.tsx"]
 
 Claude: [Loads skill instructions, gathers context, and uses Edit tool to make changes]
 ```
@@ -72,49 +72,44 @@ If the automatic setup fails, manually add to `~/.config/claude/claude_desktop_c
 ```json
 {
   "mcpServers": {
-    "agentmarketplace": {
+    "mentat": {
       "command": "node",
-      "args": ["/path/to/mcp-server/dist/index.js"],
+      "args": ["/path/to/mentat/mcp-server/dist/index.js"],
       "env": {
         "AUTH_TOKEN": "your_token_here",
-        "API_URL": "https://agentmarketplace.com"
+        "API_URL": "http://localhost:3000"
       }
     }
   }
 }
 ```
 
-Get your token at: https://agentmarketplace.com/settings/api
+Get your token by running the setup command or accessing your local instance.
 
 ## 📖 Documentation
 
-- **Setup Guide**: https://agentmarketplace.com/docs/setup
-- **Skills Catalog**: https://agentmarketplace.com/skills
-- **API Reference**: https://agentmarketplace.com/docs/api
-- **Troubleshooting**: https://agentmarketplace.com/docs/troubleshooting
+See the main [README](https://github.com/vgardrinier/mentat) for full documentation.
 
 ## 🐛 Troubleshooting
 
 **MCP server not showing in Claude Code?**
 1. Restart Claude Code completely
-2. Check config path: `cat ~/.config/claude/claude_desktop_config.json`
+2. Check config path: `cat ~/Library/Application\ Support/Claude/claude_desktop_config.json` (macOS)
 3. Check logs: `tail -f ~/Library/Logs/Claude/mcp.log`
 
 **Skills not loading?**
-1. Check API connection: `curl https://agentmarketplace.com/api/skills`
+1. Check API connection: `curl http://localhost:3000/api/skills`
 2. Verify auth token is set
 3. Check console for errors
 
 **Need help?**
-- Web Dashboard: https://agentmarketplace.com/help
-- Documentation: https://agentmarketplace.com/docs
-- Email: support@agentmarketplace.com
+- GitHub: https://github.com/vgardrinier/mentat/issues
 
 ## 🔒 Security
 
-- API tokens are stored locally in `~/.agentmarketplace/config.json`
+- API tokens are stored locally in `~/.mentat/config.json`
 - Tokens are long-lived but can be revoked anytime
-- Skills run locally, no code sent to our servers
+- Skills run locally, no code sent to external servers
 - Workers receive only necessary context (secrets scanner active)
 
 ## 📝 License

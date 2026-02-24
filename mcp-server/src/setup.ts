@@ -70,7 +70,7 @@ async function setup() {
   console.log('  • fix-eslint - Fix ESLint errors');
   console.log('  • optimize-images - Optimize images');
   console.log('');
-  console.log('Need help? https://github.com/vgardrinier/a2a_marketplace');
+  console.log('Need help? https://github.com/vgardrinier/mentat');
   console.log('');
 
   // Exit cleanly
@@ -286,7 +286,7 @@ setup().catch((error) => {
   console.error('  • Check that port 3456 is not in use');
   console.error('  • Try running the command again');
   console.error('');
-  console.error('Need help? https://github.com/vgardrinier/a2a_marketplace');
+  console.error('Need help? https://github.com/vgardrinier/mentat');
   console.error('');
   process.exit(1);
 });
