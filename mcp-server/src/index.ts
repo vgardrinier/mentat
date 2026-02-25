@@ -30,7 +30,7 @@ class MentatServer {
       }
     );
 
-    this.skillLibrary = new SkillLibrary(SKILLS_PATH, WORKSPACE_PATH);
+    this.skillLibrary = new SkillLibrary(SKILLS_PATH, WORKSPACE_PATH, API_BASE_URL);
 
     this.setupHandlers();
   }
