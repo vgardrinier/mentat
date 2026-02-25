@@ -5,6 +5,13 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-green-400">
       <div className="max-w-4xl mx-auto px-4 py-16 font-mono">
+        {/* Navigation */}
+        <nav className="mb-8 flex justify-end space-x-4 text-sm">
+          <Link href="/for-agents" className="text-green-600 hover:text-green-500">
+            For AI Agents →
+          </Link>
+        </nav>
+
         {/* Hero */}
         <div className="mb-16">
           <div className="text-green-500 mb-8">
