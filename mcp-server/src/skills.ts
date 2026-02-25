@@ -1,5 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import os from 'os';
+import crypto from 'crypto';
 import yaml from 'yaml';
 import { glob } from 'glob';
 
@@ -33,17 +35,74 @@ const LIMITS = {
 export class SkillLibrary {
   constructor(
     private skillsPath: string,
-    private workspacePath: string
+    private workspacePath: string,
+    private apiBaseUrl?: string
   ) {}
 
   /**
-   * Load skill from YAML
+   * Load skill from YAML with 3-tier resolution:
+   * 1. Project override (./skills/)
+   * 2. Cache (~/.mentat/skills/)
+   * 3. API fetch with SHA256 verification
    */
-  async loadSkill(skillId: string): Promise<SkillDefinition> {
-    const skillPath = path.join(this.skillsPath, `${skillId}.yaml`);
-    const content = await fs.readFile(skillPath, 'utf-8');
-    const parsed = yaml.parse(content);
+  async loadSkill(skillId: string, version: string = 'latest'): Promise<SkillDefinition> {
+    // 1. Check project override: ./skills/{skillId}.yaml
+    const projectPath = path.join(this.workspacePath, 'skills', `${skillId}.yaml`);
+    if (await this.fileExists(projectPath)) {
+      const content = await fs.readFile(projectPath, 'utf-8');
+      return this.parseSkillYaml(content);
+    }
 
+    // 2. Check cache: ~/.mentat/skills/{skillId}/{version}.yaml
+    const cachedPath = path.join(os.homedir(), '.mentat', 'skills', skillId, `${version}.yaml`);
+    if (await this.fileExists(cachedPath)) {
+      const content = await fs.readFile(cachedPath, 'utf-8');
+      return this.parseSkillYaml(content);
+    }
+
+    // 3. Fetch from API (if configured)
+    if (!this.apiBaseUrl) {
+      throw new Error(`Skill ${skillId} not found locally and no API configured`);
+    }
+
+    const response = await fetch(`${this.apiBaseUrl}/api/skills/${skillId}/${version}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch skill ${skillId}@${version}: ${response.statusText}`);
+    }
+
+    const { yaml_content, sha256, version: actualVersion } = await response.json();
+
+    // 4. Verify integrity
+    const computedHash = crypto.createHash('sha256').update(yaml_content).digest('hex');
+    if (computedHash !== sha256) {
+      throw new Error(`SHA256 mismatch for ${skillId}@${actualVersion}`);
+    }
+
+    // 5. Cache locally
+    const cachePath = path.join(os.homedir(), '.mentat', 'skills', skillId, `${actualVersion}.yaml`);
+    await fs.mkdir(path.dirname(cachePath), { recursive: true });
+    await fs.writeFile(cachePath, yaml_content);
+
+    return this.parseSkillYaml(yaml_content);
+  }
+
+  /**
+   * Check if file exists
+   */
+  private async fileExists(filePath: string): Promise<boolean> {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Parse skill YAML content
+   */
+  private parseSkillYaml(content: string): SkillDefinition {
+    const parsed = yaml.parse(content);
     return {
       id: parsed.skill.id,
       name: parsed.skill.name,

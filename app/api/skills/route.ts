@@ -11,14 +11,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
     const search = searchParams.get('search');
 
     let query = db.select().from(skills);
-
-    if (category) {
-      query = query.where(eq(skills.category, category)) as any;
-    }
 
     if (search) {
       query = query.where(like(skills.name, `%${search}%`)) as any;

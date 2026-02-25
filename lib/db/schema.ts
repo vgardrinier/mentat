@@ -14,19 +14,35 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Skills table
+// Skills table (metadata only)
 export const skills = pgTable('skills', {
-  id: varchar('id', { length: 100 }).primaryKey(), // e.g., "seo-meta-tags@1"
+  id: varchar('id', { length: 100 }).primaryKey(), // e.g., "seo-meta-tags"
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description').notNull(),
-  category: varchar('category', { length: 50 }).notNull(),
-  definition: jsonb('definition').notNull(), // Full YAML parsed to JSON
-  pricing: decimal('pricing', { precision: 10, scale: 2 }).default('0.00').notNull(),
-  creatorId: uuid('creator_id').references(() => users.id),
-  usageCount: integer('usage_count').default(0).notNull(),
-  rating: decimal('rating', { precision: 3, scale: 2 }),
-  version: varchar('version', { length: 20 }).notNull(), // semver
+  latestVersion: varchar('latest_version', { length: 20 }).notNull(), // e.g., "1.0.0"
+  authorId: uuid('author_id').references(() => users.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Skill versions table (versioned content)
+export const skillVersions = pgTable('skill_versions', {
+  skillId: varchar('skill_id', { length: 100 }).references(() => skills.id).notNull(),
+  version: varchar('version', { length: 20 }).notNull(), // e.g., "1.0.0"
+  yamlContent: text('yaml_content').notNull(), // Raw YAML
+  sha256: varchar('sha256', { length: 64 }).notNull(), // Integrity hash
+  instructions: text('instructions').notNull(),
+  contextPatterns: jsonb('context_patterns'), // Array of glob patterns
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  pk: { name: 'skill_versions_pkey', columns: [table.skillId, table.version] }
+}));
+
+// Skill executions table (usage tracking)
+export const skillExecutions = pgTable('skill_executions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  skillId: varchar('skill_id', { length: 100 }).notNull(),
+  version: varchar('version', { length: 20 }).notNull(),
+  executedAt: timestamp('executed_at').defaultNow().notNull(),
 });
 
 // Workers table
@@ -112,6 +128,12 @@ export type NewUser = typeof users.$inferInsert;
 
 export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
+
+export type SkillVersion = typeof skillVersions.$inferSelect;
+export type NewSkillVersion = typeof skillVersions.$inferInsert;
+
+export type SkillExecution = typeof skillExecutions.$inferSelect;
+export type NewSkillExecution = typeof skillExecutions.$inferInsert;
 
 export type Worker = typeof workers.$inferSelect;
 export type NewWorker = typeof workers.$inferInsert;
